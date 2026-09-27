@@ -1,8 +1,6 @@
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/models/treat_item.model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/colors_constants.dart';
@@ -10,11 +8,14 @@ import '../config/colors_constants.dart';
 class CheckoutWidget extends StatelessWidget {
   final CoffeeItem coffee;
   final TreatItem? treat;
-  const CheckoutWidget({super.key, required this.coffee, this.treat});
+  final String size;
+  const CheckoutWidget({super.key, required this.coffee, this.treat, this.size = 'M'});
+
+  double get total => coffee.priceFor(size) + (treat?.price ?? 0);
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size screen = MediaQuery.of(context).size;
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -28,9 +29,9 @@ class CheckoutWidget extends StatelessWidget {
         ),
         if (treat != null)
           Align(
-            alignment: Alignment(2, 0.5),
+            alignment: const Alignment(2, 0.5),
             child: SizedBox(
-              width: size.width * 0.8,
+              width: screen.width * 0.8,
               child: Hero(
                 tag: "treat_${treat!.id}",
                 child: Image.asset(
@@ -40,104 +41,130 @@ class CheckoutWidget extends StatelessWidget {
               ),
             ),
           ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.all(25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text("My Order",
-                    style: GoogleFonts.montserrat(
-                        fontSize: 30, fontWeight: FontWeight.w700, height: 1, color: kTitleColor)),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(coffee.name,
-                          style: GoogleFonts.questrial(
-                              fontSize: 18,
-                              letterSpacing: 1,
-                              fontWeight: FontWeight.w500,
-                              color: kTitleColor)),
-                    ),
-                    Text("${coffee.price}€",
-                        style: GoogleFonts.questrial(
-                            fontSize: 18,
-                            letterSpacing: 1,
-                            fontWeight: FontWeight.w700,
-                            color: kTitleColor.withOpacity(.7))),
-                  ],
-                ),
-                if (treat != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(treat!.name,
-                              style: GoogleFonts.questrial(
-                                  fontSize: 18,
-                                  letterSpacing: 1,
-                                  fontWeight: FontWeight.w500,
-                                  color: kTitleColor)),
-                        ),
-                        Text("${treat!.price}€",
-                            style: GoogleFonts.questrial(
-                                fontSize: 18,
-                                letterSpacing: 1,
-                                fontWeight: FontWeight.w700,
-                                color: kTitleColor.withOpacity(.7))),
-                      ],
-                    ),
-                  ),
-                Spacer(),
-                ElevatedButton(
+        Padding(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text("My Order",
+                  style: GoogleFonts.montserrat(
+                      fontSize: 30, fontWeight: FontWeight.w700, height: 1, color: kTitleColor)),
+              const SizedBox(height: 25),
+              _line("${coffee.name} · ${CoffeeItem.sizeNames[size]}", coffee.priceFor(size)),
+              if (treat != null) _line(treat!.name, treat!.price),
+              Divider(height: 24, color: kTitleColor.withValues(alpha: .15)),
+              _line("Total", total, bold: true),
+              const Spacer(),
+              SafeArea(
+                top: false,
+                child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: kTitleColor,
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    backgroundColor: kTitleColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: () {},
-                  child: Text("Checkout (${(coffee.price + (treat?.price ?? 0)).toStringAsFixed(2)}€)"),
-                )
-              ],
-            ),
+                  onPressed: () => _placeOrder(context),
+                  child: Text("Checkout (${total.toStringAsFixed(2)}€)",
+                      style: GoogleFonts.questrial(fontSize: 18)),
+                ),
+              ),
+            ],
           ),
-        )
+        ),
       ],
     );
   }
+
+  Widget _line(String label, double price, {bool bold = false}) {
+    final style = GoogleFonts.questrial(
+        fontSize: 18,
+        letterSpacing: 1,
+        fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+        color: kTitleColor);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: style)),
+          Text("${price.toStringAsFixed(2)}€",
+              style: style.copyWith(
+                  fontWeight: FontWeight.w700, color: kTitleColor.withValues(alpha: bold ? 1 : .7))),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _placeOrder(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 32,
+                backgroundColor: kBrownColor,
+                child: Icon(Icons.check, color: Colors.white, size: 32),
+              ),
+              const SizedBox(height: 20),
+              Text("Order placed!",
+                  style:
+                      GoogleFonts.montserrat(fontSize: 26, fontWeight: FontWeight.w700, color: kTitleColor)),
+              const SizedBox(height: 8),
+              Text("Your ${coffee.name} will be ready in a few minutes.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.questrial(fontSize: 16, color: kTitleColor.withValues(alpha: .6))),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kTitleColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Back to menu", style: GoogleFonts.questrial(fontSize: 18)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    navigator.popUntil(ModalRoute.withName('home'));
+  }
 }
 
-_buildBackground() {
+Widget _buildBackground() {
   return Column(
     children: [
       Expanded(
-        flex: 1,
         child: Container(
             decoration: BoxDecoration(
           gradient: LinearGradient(
             end: Alignment.topCenter,
             begin: Alignment.bottomCenter,
             stops: const [0.0, .50],
-            colors: [kBrownColor.withOpacity(.7), kBrownColor.withOpacity(0.0)],
+            colors: [kBrownColor.withValues(alpha: .7), kBrownColor.withValues(alpha: 0.0)],
           ),
         )),
       ),
       Expanded(
-        flex: 1,
         child: Container(
             decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            stops: [0.0, .4],
-            colors: [kBrownColor.withOpacity(.5), kBrownColor.withOpacity(0.0)],
+            stops: const [0.0, .4],
+            colors: [kBrownColor.withValues(alpha: .5), kBrownColor.withValues(alpha: 0.0)],
           ),
         )),
       ),

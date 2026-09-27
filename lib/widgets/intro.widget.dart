@@ -5,7 +5,6 @@ import 'package:coffee_order_app_flutter/config/services_locator.dart';
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/services/navigation.service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class IntroWidget extends StatelessWidget {
@@ -25,7 +24,7 @@ class IntroWidget extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             stops: [0, .3, 0.4],
-            colors: [Colors.white, kBrownColor, Colors.white.withOpacity(0.8)],
+            colors: [Colors.white, kBrownColor, Colors.white.withValues(alpha: 0.8)],
           ),
         ),
         child: Stack(children: [
@@ -37,8 +36,8 @@ class IntroWidget extends StatelessWidget {
               alignment: Alignment.topCenter,
               transform: Matrix4.identity()
                 ..setEntry(3, 2, 0.001)
-                ..translate(10.0, translate)
-                ..scale(scale),
+                ..translateByDouble(10.0, translate, 0, 1)
+                ..scaleByDouble(scale, scale, scale, 1),
               child: Hero(
                 tag: "coffee_${CoffeeItem.mockItems[index].id}",
                 child: Image.asset(
@@ -47,7 +46,7 @@ class IntroWidget extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          }),
           Align(
             alignment: Alignment.center + Alignment(0, 0.25),
             child: Stack(

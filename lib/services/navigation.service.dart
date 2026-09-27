@@ -5,8 +5,13 @@ class NavigationArguments {
   final int? treat;
   final bool isSweetTreats;
   final bool isCheckout;
+  final String size;
   NavigationArguments(
-      {required this.coffee, this.treat, this.isSweetTreats = false, this.isCheckout = false});
+      {required this.coffee,
+      this.treat,
+      this.isSweetTreats = false,
+      this.isCheckout = false,
+      this.size = 'M'});
 }
 
 class NavigationService {

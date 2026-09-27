@@ -2,7 +2,6 @@ import 'package:coffee_order_app_flutter/config/scroll_config.dart';
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/models/treat_item.model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../config/colors_constants.dart';
@@ -11,7 +10,8 @@ import '../services/navigation.service.dart';
 
 class TreatsListWidget extends StatefulWidget {
   final CoffeeItem coffee;
-  const TreatsListWidget({super.key, required this.coffee});
+  final String size;
+  const TreatsListWidget({super.key, required this.coffee, required this.size});
 
   @override
   State<TreatsListWidget> createState() => TreatsListWidgetState();
@@ -48,6 +48,8 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
   @override
   void dispose() {
     _treatsController.removeListener(_navigationListener);
+    _treatsController.dispose();
+    _headingController.dispose();
     super.dispose();
   }
 
@@ -95,7 +97,7 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                             fontSize: 24,
                             fontWeight: FontWeight.w500,
                             height: 1,
-                            color: kTitleColor.withOpacity(.8),
+                            color: kTitleColor.withValues(alpha: .8),
                           ),
                         ),
                       );
@@ -130,7 +132,7 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
                   height: 1,
-                  color: kTitleColor.withOpacity(.5),
+                  color: kTitleColor.withValues(alpha: .5),
                 ),
                 textAlign: TextAlign.right,
               ),
@@ -153,7 +155,7 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                 // we need to know how much index is far from the current page to scale it
                 final double distance = (_currentPosition - index + 1).abs();
                 final isNotOnScreen = (_currentPosition - index + 1) > 0;
-                final double scale = 1 - distance * .38;
+                final double scale = isNotOnScreen ? 1 - distance * .38 : 1.0;
                 final double translateY = (1 - scale).abs() * MediaQuery.of(context).size.height / 1.5 +
                     25 * (distance - 1).clamp(0.0, 1);
                 return Padding(
@@ -161,8 +163,8 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                   child: Transform(
                     transform: Matrix4.identity()
                       ..setEntry(3, 2, 0.001)
-                      ..translate(0.0, !isNotOnScreen ? 0.0 : translateY)
-                      ..scale(!isNotOnScreen ? 1.0 : scale),
+                      ..translateByDouble(0.0, !isNotOnScreen ? 0.0 : translateY, 0, 1)
+                      ..scaleByDouble(scale, scale, scale, 1),
                     alignment: Alignment.bottomRight,
                     child: Hero(
                       tag: "treat_${TreatItem.mockItems[index - 1].id}",
@@ -186,6 +188,7 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                     treat: TreatItem.mockItems.indexOf(
                         TreatItem.mockItems[_currentHeading.clamp(0, TreatItem.mockItems.length - 1)]),
                     isCheckout: true,
+                    size: widget.size,
                   ),
                 );
               },
@@ -198,7 +201,7 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
                 padding: const EdgeInsets.all(8),
               ),
               child: const Icon(
-                FeatherIcons.plus,
+                Icons.add,
                 color: kTitleColor,
                 size: 32,
               ),

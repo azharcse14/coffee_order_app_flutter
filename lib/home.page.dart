@@ -1,4 +1,3 @@
-import 'package:coffee_order_app_flutter/config/colors_constants.dart';
 import 'package:coffee_order_app_flutter/config/services_locator.dart';
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/models/treat_item.model.dart';
@@ -7,7 +6,6 @@ import 'package:coffee_order_app_flutter/widgets/checkout.widget.dart';
 import 'package:coffee_order_app_flutter/widgets/intro.widget.dart';
 import 'package:coffee_order_app_flutter/widgets/sweet_treats.widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 
 import 'coffe_details.page.dart';
 import 'widgets/coffee_list.widget.dart';
@@ -30,18 +28,18 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(
-              FeatherIcons.chevronLeft,
+              Icons.chevron_left,
               color: Colors.black,
               size: 30,
             ),
             onPressed: () {
-              locator.get<NavigationService>().navigatorKey.currentState!.pop();
+              locator.get<NavigationService>().navigatorKey.currentState!.maybePop();
             },
           ),
           actions: [
             IconButton(
               icon: const Icon(
-                FeatherIcons.shoppingBag,
+                Icons.shopping_bag_outlined,
                 size: 30,
                 color: Colors.black,
               ),
@@ -72,12 +70,14 @@ class _HomePageState extends State<HomePage> {
                         coffee: CoffeeItem.mockItems[args.coffee],
                       );
                       if (args.isSweetTreats) {
-                        currentPage = SweetTreatsWidget(coffee: CoffeeItem.mockItems[args.coffee]);
+                        currentPage =
+                            SweetTreatsWidget(coffee: CoffeeItem.mockItems[args.coffee], size: args.size);
                       }
                       if (args.isCheckout) {
                         currentPage = CheckoutWidget(
                           coffee: CoffeeItem.mockItems[args.coffee],
                           treat: args.treat != null ? TreatItem.mockItems[args.treat!] : null,
+                          size: args.size,
                         );
                       }
                     }

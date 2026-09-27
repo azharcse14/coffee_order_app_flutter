@@ -1,7 +1,6 @@
 import 'package:coffee_order_app_flutter/config/services_locator.dart';
 import 'package:coffee_order_app_flutter/services/navigation.service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'config/colors_constants.dart';
@@ -60,7 +59,9 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
                         ),
                         onPressed: () {
                           locator<NavigationService>().navigateTo(NavigationArguments(
-                              coffee: CoffeeItem.mockItems.indexOf(widget.coffee), isSweetTreats: true));
+                              coffee: CoffeeItem.mockItems.indexOf(widget.coffee),
+                              isSweetTreats: true,
+                              size: sizeCoffee));
                         },
                         child: Row(
                           children: [
@@ -74,7 +75,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
                               width: 5,
                             ),
                             const Icon(
-                              FeatherIcons.chevronsRight,
+                              Icons.keyboard_double_arrow_right,
                               size: 18,
                             )
                           ],
@@ -91,7 +92,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
                   Row(
                     children: [
                       const Icon(
-                        FeatherIcons.coffee,
+                        Icons.local_cafe_outlined,
                         color: kTitleColor,
                         size: 30,
                       ),
@@ -99,11 +100,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
                         width: 5,
                       ),
                       Text(
-                        sizeCoffee == 'M'
-                            ? "Basic"
-                            : sizeCoffee == 'L'
-                                ? "Large"
-                                : "Small",
+                        CoffeeItem.sizeNames[sizeCoffee]!,
                         style: GoogleFonts.questrial(
                           fontSize: 18,
                           fontWeight: FontWeight.w400,
@@ -153,9 +150,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
               ),
               Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                    "${(widget.coffee.price + (sizeCoffee == "M" ? 0 : (sizeCoffee == "L" ? 1.2 : -.8))).toStringAsFixed(2)}€",
-                    style: titleStyle),
+                child: Text("${widget.coffee.priceFor(sizeCoffee).toStringAsFixed(2)}€", style: titleStyle),
               ),
               Spacer(),
               Text(
@@ -165,7 +160,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
                   fontSize: 18,
                   fontWeight: FontWeight.w400,
                   height: 1.5,
-                  color: kTitleColor.withOpacity(0.5),
+                  color: kTitleColor.withValues(alpha: 0.5),
                 ),
               ),
               SizedBox(
@@ -214,7 +209,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
     ]);
   }
 
-  _buildBackground() {
+  Widget _buildBackground() {
     return Column(
       children: [
         Expanded(
@@ -225,7 +220,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
               end: Alignment.topRight,
               begin: Alignment.bottomLeft,
               stops: [0.0, .50],
-              colors: [kBrownColor.withOpacity(.7), kBrownColor.withOpacity(0.0)],
+              colors: [kBrownColor.withValues(alpha: .7), kBrownColor.withValues(alpha: 0.0)],
             ),
           )),
         ),
@@ -237,7 +232,7 @@ class _CoffeeDetailsPageState extends State<CoffeeDetailsPage> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               stops: [0.0, .4],
-              colors: [kBrownColor.withOpacity(.5), kBrownColor.withOpacity(0.0)],
+              colors: [kBrownColor.withValues(alpha: .5), kBrownColor.withValues(alpha: 0.0)],
             ),
           )),
         ),

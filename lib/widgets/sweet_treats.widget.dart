@@ -9,7 +9,8 @@ import '../services/navigation.service.dart';
 
 class SweetTreatsWidget extends StatefulWidget {
   final CoffeeItem coffee;
-  const SweetTreatsWidget({super.key, required this.coffee});
+  final String size;
+  const SweetTreatsWidget({super.key, required this.coffee, required this.size});
 
   @override
   State<SweetTreatsWidget> createState() => _SweetTreatsWidgetState();
@@ -28,7 +29,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
     return Stack(
       children: [
         _buildBackground(),
-        TreatsListWidget(coffee: widget.coffee),
+        TreatsListWidget(coffee: widget.coffee, size: widget.size),
         Align(
             alignment: Alignment.topRight,
             child: Padding(
@@ -54,7 +55,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
                             style: GoogleFonts.questrial(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w100,
-                                color: kTitleColor.withOpacity(.5))),
+                                color: kTitleColor.withValues(alpha: .5))),
                         const SizedBox(height: 15),
                         Align(
                             alignment: Alignment.centerRight,
@@ -69,7 +70,9 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
                                 ),
                                 onPressed: () {
                                   locator<NavigationService>().navigateTo(NavigationArguments(
-                                      coffee: CoffeeItem.mockItems.indexOf(widget.coffee), isCheckout: true));
+                                      coffee: CoffeeItem.mockItems.indexOf(widget.coffee),
+                                      isCheckout: true,
+                                      size: widget.size));
                                 },
                                 child: Text("No, thanks!"))),
                       ],
@@ -82,7 +85,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
     );
   }
 
-  _buildBackground() {
+  Widget _buildBackground() {
     return Column(
       children: [
         Expanded(
@@ -93,7 +96,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
               end: Alignment.topLeft,
               begin: Alignment.bottomRight,
               stops: [0.0, .50],
-              colors: [kBrownColor.withOpacity(.7), kBrownColor.withOpacity(0.0)],
+              colors: [kBrownColor.withValues(alpha: .7), kBrownColor.withValues(alpha: 0.0)],
             ),
           )),
         ),
@@ -105,7 +108,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
               stops: [0.0, .4],
-              colors: [kBrownColor.withOpacity(.5), kBrownColor.withOpacity(0.0)],
+              colors: [kBrownColor.withValues(alpha: .5), kBrownColor.withValues(alpha: 0.0)],
             ),
           )),
         ),

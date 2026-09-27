@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class TreatItem {
   final String id;
   final String name;

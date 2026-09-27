@@ -12,6 +12,10 @@ class CoffeeItem {
       required this.image,
       required this.price});
 
+  static const sizeNames = {'S': 'Small', 'M': 'Basic', 'L': 'Large'};
+
+  double priceFor(String size) => price + const {'S': -.8, 'M': 0.0, 'L': 1.2}[size]!;
+
   // mock data
   // 10 items
   // price beetwen 2 and 8

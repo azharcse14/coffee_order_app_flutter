@@ -44,8 +44,9 @@ class _CofeeListWidgetState extends State<CofeeListWidget> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _coffeController.removeListener(_navigationListener);
+    _coffeController.dispose();
+    _headingController.dispose();
     super.dispose();
   }
 
@@ -79,8 +80,8 @@ class _CofeeListWidgetState extends State<CofeeListWidget> {
                   child: Transform(
                     transform: Matrix4.identity()
                       ..setEntry(3, 2, 0.001)
-                      ..translate(0.0, !isNotOnScreen ? 0.0 : translateY)
-                      ..scale(scale),
+                      ..translateByDouble(0.0, !isNotOnScreen ? 0.0 : translateY, 0, 1)
+                      ..scaleByDouble(scale, scale, scale, 1),
                     alignment: Alignment.bottomCenter,
                     child: GestureDetector(
                       onTap: () {
@@ -126,7 +127,7 @@ class _CofeeListWidgetState extends State<CofeeListWidget> {
                 stops: [.6, 1],
                 colors: [
                   Colors.white,
-                  Colors.white.withOpacity(0.0),
+                  Colors.white.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -235,7 +236,7 @@ class _CofeeListWidgetState extends State<CofeeListWidget> {
                 // color: kBrownColor,
                 boxShadow: [
                   BoxShadow(
-                    color: kBrownColor.withOpacity(.4),
+                    color: kBrownColor.withValues(alpha: .4),
                     blurRadius: 60,
                     spreadRadius: 20,
                     offset: Offset(5, 0),
@@ -260,8 +261,8 @@ class _CofeeListWidgetState extends State<CofeeListWidget> {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [
-                kBrownColor.withRed(170).withOpacity(.6),
-                kBrownColor.withOpacity(0.0),
+                kBrownColor.withRed(170).withValues(alpha: .6),
+                kBrownColor.withValues(alpha: 0.0),
               ],
             ),
           ),
