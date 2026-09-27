@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/colors_constants.dart';
 import '../config/services_locator.dart';
+import '../models/cart.model.dart';
 import '../models/coffee_item.model.dart';
 import '../services/navigation.service.dart';
 
@@ -69,6 +70,7 @@ class _SweetTreatsWidgetState extends State<SweetTreatsWidget> {
                                   ),
                                 ),
                                 onPressed: () {
+                                  locator<Cart>().add(CartItem(coffee: widget.coffee, size: widget.size));
                                   locator<NavigationService>().navigateTo(NavigationArguments(
                                       coffee: CoffeeItem.mockItems.indexOf(widget.coffee),
                                       isCheckout: true,

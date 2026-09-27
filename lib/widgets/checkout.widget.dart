@@ -1,3 +1,5 @@
+import 'package:coffee_order_app_flutter/config/services_locator.dart';
+import 'package:coffee_order_app_flutter/models/cart.model.dart';
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/models/treat_item.model.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +10,7 @@ import '../config/colors_constants.dart';
 class CheckoutWidget extends StatelessWidget {
   final CoffeeItem coffee;
   final TreatItem? treat;
-  final String size;
-  const CheckoutWidget({super.key, required this.coffee, this.treat, this.size = 'M'});
-
-  double get total => coffee.priceFor(size) + (treat?.price ?? 0);
+  const CheckoutWidget({super.key, required this.coffee, this.treat});
 
   @override
   Widget build(BuildContext context) {
@@ -41,42 +40,74 @@ class CheckoutWidget extends StatelessWidget {
               ),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.all(25),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text("My Order",
-                  style: GoogleFonts.montserrat(
-                      fontSize: 30, fontWeight: FontWeight.w700, height: 1, color: kTitleColor)),
-              const SizedBox(height: 25),
-              _line("${coffee.name} · ${CoffeeItem.sizeNames[size]}", coffee.priceFor(size)),
-              if (treat != null) _line(treat!.name, treat!.price),
-              Divider(height: 24, color: kTitleColor.withValues(alpha: .15)),
-              _line("Total", total, bold: true),
-              const Spacer(),
-              SafeArea(
-                top: false,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kTitleColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ValueListenableBuilder(
+          valueListenable: locator<Cart>(),
+          builder: (context, items, _) => Padding(
+            padding: const EdgeInsets.all(25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text("My Order",
+                    style: GoogleFonts.montserrat(
+                        fontSize: 30, fontWeight: FontWeight.w700, height: 1, color: kTitleColor)),
+                const SizedBox(height: 25),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    children: [
+                      for (final item in items)
+                        _line(
+                          [
+                            "${item.coffee.name} · ${CoffeeItem.sizeNames[item.size]}",
+                            if (item.treat != null) "+ ${item.treat!.name}",
+                          ].join("\n"),
+                          item.price,
+                          onRemove: () => _remove(context, item),
+                        ),
+                    ],
                   ),
-                  onPressed: () => _placeOrder(context),
-                  child: Text("Checkout (${total.toStringAsFixed(2)}€)",
-                      style: GoogleFonts.questrial(fontSize: 18)),
                 ),
-              ),
-            ],
+                Divider(height: 24, color: kTitleColor.withValues(alpha: .15)),
+                _line("Total", locator<Cart>().total, bold: true),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(foregroundColor: kTitleColor, padding: EdgeInsets.zero),
+                    onPressed: () => Navigator.of(context).popUntil(ModalRoute.withName('home')),
+                    icon: const Icon(Icons.add),
+                    label: Text("Add more", style: GoogleFonts.questrial(fontSize: 16)),
+                  ),
+                ),
+                const Spacer(),
+                SafeArea(
+                  top: false,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kTitleColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: () => _placeOrder(context),
+                    child: Text("Checkout (${locator<Cart>().total.toStringAsFixed(2)}€)",
+                        style: GoogleFonts.questrial(fontSize: 18)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _line(String label, double price, {bool bold = false}) {
+  void _remove(BuildContext context, CartItem item) {
+    final cart = locator<Cart>()..remove(item);
+    if (cart.value.isEmpty) Navigator.of(context).popUntil(ModalRoute.withName('home'));
+  }
+
+  Widget _line(String label, double price, {bool bold = false, VoidCallback? onRemove}) {
     final style = GoogleFonts.questrial(
         fontSize: 18,
         letterSpacing: 1,
@@ -90,6 +121,13 @@ class CheckoutWidget extends StatelessWidget {
           Text("${price.toStringAsFixed(2)}€",
               style: style.copyWith(
                   fontWeight: FontWeight.w700, color: kTitleColor.withValues(alpha: bold ? 1 : .7))),
+          if (onRemove != null)
+            IconButton(
+              tooltip: "Remove",
+              visualDensity: VisualDensity.compact,
+              onPressed: onRemove,
+              icon: Icon(Icons.close, size: 18, color: kTitleColor.withValues(alpha: .5)),
+            ),
         ],
       ),
     );
@@ -117,7 +155,7 @@ class CheckoutWidget extends StatelessWidget {
                   style:
                       GoogleFonts.montserrat(fontSize: 26, fontWeight: FontWeight.w700, color: kTitleColor)),
               const SizedBox(height: 8),
-              Text("Your ${coffee.name} will be ready in a few minutes.",
+              Text("Your order will be ready in a few minutes.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.questrial(fontSize: 16, color: kTitleColor.withValues(alpha: .6))),
               const SizedBox(height: 24),
@@ -139,6 +177,7 @@ class CheckoutWidget extends StatelessWidget {
         ),
       ),
     );
+    locator<Cart>().clear();
     navigator.popUntil(ModalRoute.withName('home'));
   }
 }

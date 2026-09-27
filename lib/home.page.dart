@@ -1,10 +1,12 @@
 import 'package:coffee_order_app_flutter/config/services_locator.dart';
+import 'package:coffee_order_app_flutter/models/cart.model.dart';
 import 'package:coffee_order_app_flutter/models/coffee_item.model.dart';
 import 'package:coffee_order_app_flutter/models/treat_item.model.dart';
 import 'package:coffee_order_app_flutter/services/navigation.service.dart';
 import 'package:coffee_order_app_flutter/widgets/checkout.widget.dart';
 import 'package:coffee_order_app_flutter/widgets/intro.widget.dart';
 import 'package:coffee_order_app_flutter/widgets/sweet_treats.widget.dart';
+import 'package:coffee_order_app_flutter/config/colors_constants.dart';
 import 'package:flutter/material.dart';
 
 import 'coffe_details.page.dart';
@@ -18,6 +20,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  void _openCart(BuildContext context, List<CartItem> items) {
+    if (items.isEmpty) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(content: Text('Your bag is empty')));
+      return;
+    }
+    // Show the latest item's images on the checkout page.
+    final last = items.last;
+    locator<NavigationService>().navigateTo(NavigationArguments(
+      coffee: CoffeeItem.mockItems.indexOf(last.coffee),
+      treat: last.treat == null ? null : TreatItem.mockItems.indexOf(last.treat!),
+      isCheckout: true,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,13 +55,21 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           actions: [
-            IconButton(
-              icon: const Icon(
-                Icons.shopping_bag_outlined,
-                size: 30,
-                color: Colors.black,
+            ValueListenableBuilder(
+              valueListenable: locator<Cart>(),
+              builder: (context, items, _) => IconButton(
+                icon: Badge.count(
+                  count: items.length,
+                  isLabelVisible: items.isNotEmpty,
+                  backgroundColor: kBrownColor,
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 30,
+                    color: Colors.black,
+                  ),
+                ),
+                onPressed: () => _openCart(context, items),
               ),
-              onPressed: () {},
             ),
           ],
         ),
@@ -77,7 +103,6 @@ class _HomePageState extends State<HomePage> {
                         currentPage = CheckoutWidget(
                           coffee: CoffeeItem.mockItems[args.coffee],
                           treat: args.treat != null ? TreatItem.mockItems[args.treat!] : null,
-                          size: args.size,
                         );
                       }
                     }

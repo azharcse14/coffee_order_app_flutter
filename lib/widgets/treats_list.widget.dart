@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../config/colors_constants.dart';
 import '../config/services_locator.dart';
+import '../models/cart.model.dart';
 import '../services/navigation.service.dart';
 
 class TreatsListWidget extends StatefulWidget {
@@ -182,11 +183,12 @@ class TreatsListWidgetState extends State<TreatsListWidget> {
             bottom: size.height * 0.25,
             child: ElevatedButton(
               onPressed: () {
+                final treat = TreatItem.mockItems[_currentHeading.clamp(0, TreatItem.mockItems.length - 1)];
+                locator<Cart>().add(CartItem(coffee: widget.coffee, size: widget.size, treat: treat));
                 locator<NavigationService>().navigateTo(
                   NavigationArguments(
                     coffee: CoffeeItem.mockItems.indexOf(widget.coffee),
-                    treat: TreatItem.mockItems.indexOf(
-                        TreatItem.mockItems[_currentHeading.clamp(0, TreatItem.mockItems.length - 1)]),
+                    treat: TreatItem.mockItems.indexOf(treat),
                     isCheckout: true,
                     size: widget.size,
                   ),
